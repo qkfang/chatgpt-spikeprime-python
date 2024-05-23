@@ -21,7 +21,31 @@ for moduleNode_h3 in soup.findAll("h3"):
     module['SubModules'] = []
     module['Code_Import'] = []
 
+    for moduleNode_h3_pre in (moduleNode_h3.parent).findChildren(
+                            lambda tag:tag.name == "pre" ,
+                            recursive=False
+                        ):
+        for moduleNode_h3_code in moduleNode_h3_pre.findAll('code'):
+            codeBlock = {}
+            module['Code_Import'].append(codeBlock)
 
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-keyword"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-built_in"}):    
+                code.unwrap()
+                
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-title"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-comment"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-number"}):    
+                code.unwrap()
+
+            codeBlock['Python'] = moduleNode_h3_code.text
+        
 
 
 with open("lego-api-sp.json", "w") as text_file:
