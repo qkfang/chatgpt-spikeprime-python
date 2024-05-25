@@ -7,8 +7,6 @@ with open("lego-doc-api.html",  encoding='utf-8') as fp:
 for br in soup.find_all("br"):
     br.replace_with("\n")
     
-
-    
 apiSpec = []
 for moduleNode_h3 in soup.findAll("h3"):
     print('--------------------')
@@ -45,9 +43,8 @@ for moduleNode_h3 in soup.findAll("h3"):
                 code.unwrap()
 
             codeBlock['Python'] = moduleNode_h3_code.text
-
-
-            
+        
+        
     for subModelNode_a in (moduleNode_h3.parent).findAll(
                         lambda tag:tag.name == "a" and 
                         len(tag.attrs) == 1 and
@@ -105,7 +102,30 @@ for moduleNode_h3 in soup.findAll("h3"):
                 funcParam['Parameter_Description'] = paramNode_h6.find_next_sibling('div').text.strip()
                 function['Parameters'].append(funcParam)
 
-        
+                
+        for moduleNode_h3_code in (specSubNode_h4.parent).findAll(
+                                lambda tag:tag.name == "code"and
+                                "data-testid" in tag.attrs
+                            ):
+            codeBlock = {}
+            subModule['Code_Snippet'].append(codeBlock)
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-keyword"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-built_in"}):    
+                code.unwrap()
+                
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-title"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-comment"}):    
+                code.unwrap()
+
+            for code in moduleNode_h3_code.findAll("span", {"class": "hljs-number"}):    
+                code.unwrap()
+
+            codeBlock['Python'] = moduleNode_h3_code.text
 
 
 with open("lego-api-sp.json", "w") as text_file:
