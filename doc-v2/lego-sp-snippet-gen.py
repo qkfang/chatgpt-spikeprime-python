@@ -1,28 +1,55 @@
-import os
-import re
 import json
-from openai import AzureOpenAI
+from bs4 import BeautifulSoup
+
+with open("lego-doc-api.html",  encoding='utf-8') as fp:
+    soup = BeautifulSoup(fp, 'html.parser')
+
+# for code in soup.find_all('code'):
+# for code in soup.findAll(
+#                 lambda tag:tag.name == "code" and
+#                 len(tag.attrs) == 1 and
+#                 tag["data-testid"]
+#                 ):
+    
+#     print('--------------------')
+#     code.unwrap()
+#     print(code)
+
+for code in soup.findAll("span", {"class": "hljs-keyword"}):    
+    code.unwrap()
 
 
-def Generate(fileIn, fileOut):
-    f = open(fileIn, 'r')
-    data= f.read()
-    f.close()
+for code in soup.findAll("span", {"class": "hljs-built_in"}):    
+    code.unwrap()
+    
 
-    blocks = re.split('###', data)
+for code in soup.findAll("span", {"class": "hljs-title"}):    
+    code.unwrap()
 
-    exports = []
-    for block in blocks[1:]:
-        desc = block.split('---')[0].strip('\n')
-        code = block.split('---')[1].strip('\n')
+for code in soup.findAll("span", {"class": "hljs-comment"}):    
+    code.unwrap()
 
-        export = {}
-        export["Python_Code"] = desc
-        export["Python_Description"] = code
-        exports.append(export)
+for code in soup.findAll("span", {"class": "hljs-number"}):    
+    code.unwrap()
 
-    f = open(fileOut, "w")
-    f.write(json.dumps(exports, indent=2))
-    f.close()
 
-Generate('lego-user-snippet.dt', 'chatgpt\lego-user-snippet.json')
+snippets = []
+for pre in soup.findAll(
+                lambda tag:tag.name == "pre"
+                ):
+    
+    if('main' in pre.code):
+        print('---------------')
+        print(pre.text)
+        snippet = {}
+        snippet['Python_Code'] = pre.code.text
+        if(pre.find_previous_sibling('div') != None):
+            snippet['Python_Description'] = pre.find_previous_sibling('div').text.strip()
+
+        snippets.append(snippet)
+
+
+with open("lego-snippets-sp.json", "w") as text_file:
+    text_file.write(json.dumps(snippets, indent=2))
+
+# print(soup)
